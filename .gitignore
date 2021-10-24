@@ -1,0 +1,4 @@
+// Environment Config
+.env
+
+node_modules

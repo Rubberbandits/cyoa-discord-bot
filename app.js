@@ -1,8 +1,172 @@
 // Load config
 require("dotenv").config();
 
-// Load quest object
-const { Quest } = require("./quest_class");
+// Require the necessary discord.js classes
+const { 
+	Client, 
+	Intents, 
+	MessageActionRow, 
+	MessageButton, 
+	MessageEmbed,
+	MessageSelectMenu 
+} = require('discord.js');
 
-let quest_test = new Quest;
-console.log(quest_test.name);
+// Create a new client instance
+const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
+// Load player object
+const { Player } = require("./player.js");
+var ActivePlayers = new Map;
+
+const BUTTON = 1;
+const SELECT = 2;
+
+/*
+	Load Quests
+*/
+
+const { MainQuest } = require("./main_quest");
+
+async function GenericQuestAction(actionID, i)
+{
+	const {embed, actions} = ConstructQuestAction(actionID);
+	var message = {
+		embeds: [embed],
+		components: [],
+		ephemeral: true
+	}
+
+	if (actions !== null && actions !== undefined) {
+		message.components = [actions];
+	}
+
+	await i.update(message);
+}
+
+function ConstructQuestAction(actionID)
+{
+	let action = MainQuest.actions[actionID];
+
+	// Construct Message
+	const embed = new MessageEmbed()
+		.setColor('#0099ff')
+		.setDescription(action.message);
+
+	let actionComponents = [];
+	if (action.interactionType === BUTTON) {
+		action.choices.forEach(choice => {
+			let choiceData = MainQuest.actions[choice];
+
+			actionComponents.push(
+				new MessageButton()
+					.setCustomId(choice)
+					.setLabel(choiceData.label)
+					.setStyle(choiceData.style)
+			);
+		});
+	}
+
+	// Construct Interaction
+	const row = new MessageActionRow()
+		.addComponents(...actionComponents);
+
+	return {embed: embed, actions: actionComponents.length > 0 ? row : null};
+}
+
+/*
+	Interaction Handlers
+*/
+
+const INTERACTION_HANDLERS = {
+	start: async i => {
+		let client = i.user;
+		let playerObj = ActivePlayers.get(client.id);
+		let questAction = playerObj ? playerObj.getCurrentChoiceID() : "entrypoint";
+
+		if (!playerObj) {
+			playerObj = new Player(client);
+			playerObj.addChoice(questAction);
+
+			ActivePlayers.set(client.id, playerObj);
+		}
+
+		// Construct quest option
+		const {embed, actions} = ConstructQuestAction(questAction);
+		var message = {
+			embeds: [embed],
+			components: null,
+			ephemeral: true
+		}
+
+		if (actions !== null && actions !== undefined) {
+			message.components = [actions];
+		}
+
+		await i.deferReply({ ephemeral: true });
+		i.followUp(message);
+	},
+}
+
+/*
+	Event Listeners
+*/
+
+// When the client is ready, run this code (only once)
+client.once('ready', async () => {
+	let guilds = await client.guilds.fetch();
+	let first = guilds.entries().next();
+	let guild = await first.value[1].fetch();
+
+	let gameChannel = await guild.channels.fetch(process.env.CHANNEL_ID);
+	await gameChannel.bulkDelete(1);
+
+	// Construct Message
+	const embed = new MessageEmbed()
+		.setColor('#0099ff')
+		.setTitle(MainQuest.title)
+		.setDescription(MainQuest.description);
+
+	// Construct Interaction
+	const row = new MessageActionRow()
+		.addComponents(
+			new MessageButton()
+				.setCustomId('start')
+				.setLabel(MainQuest.entry_label)
+				.setStyle(MainQuest.entry_style)
+		);
+
+	// Send initial message
+	await gameChannel.send({embeds: [embed], components: [row]});
+});
+
+// Register interaction event
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isMessageComponent()) return;
+
+	let customID = interaction.customId;
+	let handler = INTERACTION_HANDLERS[customID];
+	if (handler !== undefined) {
+		await handler(interaction);
+	}
+
+	let questAction = MainQuest.actions[customID];
+	if (questAction) {
+		let playerObj = ActivePlayers.get(interaction.user.id);
+
+		if (!playerObj.canChoose(customID)) {
+			interaction.deferUpdate();
+			return;
+		}
+
+		playerObj.addChoice(customID);
+
+		if (questAction.interactionHandler) {
+			await questAction.interactionHandler(customID, interaction);
+		} else {
+			await GenericQuestAction(customID, interaction);
+		}
+	}
+});
+
+// Login to Discord with your client's token
+client.login(process.env.DISCORD_TOKEN);

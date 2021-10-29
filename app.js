@@ -50,7 +50,7 @@ function ConstructQuestAction(actionID)
 	// Construct Message
 	const embed = new MessageEmbed()
 		.setColor('#0099ff')
-		.setDescription(action.message);
+		.setDescription(action.message || "No message.");
 
 	let actionComponents = [];
 	if (action.interactionType === BUTTON) {
@@ -88,6 +88,8 @@ const INTERACTION_HANDLERS = {
 			playerObj.addChoice(questAction);
 
 			ActivePlayers.set(client.id, playerObj);
+		} else if (playerObj.getCurrentChoiceID() == "exit") {
+			return;
 		}
 
 		// Construct quest option

@@ -50,7 +50,7 @@ async function StateSetChannel(voiceState, channelID)
 	let nextChannel = channelID || process.env.VOICE_WAITING_ID;
 	if (voiceState.channelID != nextChannel) {
 		await voiceState.setMute(true);
-		await voiceState.setChannel(channelID);
+		await voiceState.setChannel(nextChannel);
 	}
 }
 

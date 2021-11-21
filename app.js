@@ -27,6 +27,20 @@ const SELECT = 2;
 
 const { MainQuest } = require("./main_quest");
 
+for (var choice in MainQuest.actions) {
+	let choiceData = MainQuest.actions[choice];
+
+	if (choiceData.choices && typeof choiceData.choices === "object" && choiceData.choices[0]) {
+		for (var nextChoice of choiceData.choices) {
+			if (!MainQuest.actions[nextChoice]) {
+				console.log(`Missing action found: ${nextChoice}`)
+			}
+		}
+	} else {
+		console.log(`Missing choices key/isn't an array in choice: ${choice}`)
+	}
+}
+
 async function GenericQuestAction(actionID, i)
 {
 	const {embed, actions} = ConstructQuestAction(actionID);
@@ -139,6 +153,8 @@ client.once('ready', async () => {
 
 	// Send initial message
 	await gameChannel.send({embeds: [embed], components: [row]});
+
+	console.log("Bot ready!")
 });
 
 // Register interaction event
@@ -161,6 +177,10 @@ client.on('interactionCreate', async interaction => {
 		}
 
 		playerObj.addChoice(customID);
+
+		if (questAction.assignRole) {
+			interaction.user.roles.add(questAction.assignRole);
+		}
 
 		if (questAction.interactionHandler) {
 			await questAction.interactionHandler(customID, interaction);

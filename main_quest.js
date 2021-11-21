@@ -63,6 +63,7 @@ const MainQuest = {
 			label: "Get Item",
 			style: "PRIMARY",
 			message: "You've got the item.",
+			assignRole: "912053448210522193",
 			choices: [
 				"exit",
 				"left",

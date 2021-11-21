@@ -41,6 +41,21 @@ for (var choice in MainQuest.actions) {
 	}
 }
 
+/*
+	Channel Movement Helper
+*/
+
+async function StateSetChannel(voiceState, channelID)
+{
+	if (!channelID) {
+		await voiceState.setMute(true);
+		await voiceState.setChannel(process.env.VOICE_WAITING_ID);
+	} else {
+		await voiceState.setMute(true);
+		await voiceState.setChannel(channelID);
+	}
+}
+
 async function GenericQuestAction(actionID, i)
 {
 	const {embed, actions} = ConstructQuestAction(actionID);
@@ -108,6 +123,11 @@ const INTERACTION_HANDLERS = {
 			ActivePlayers.set(client.id, playerObj);
 		} else if (playerObj.getCurrentChoiceID() == "exit") {
 			return;
+		}
+
+		let memberObj = i.guild.members.resolve(client.id);
+		if (memberObj.voice.channel) {
+			await StateSetChannel(memberObj.voice);
 		}
 
 		// Construct quest option
@@ -182,16 +202,19 @@ client.on('interactionCreate', async interaction => {
 
 		playerObj.addChoice(customID);
 
-		if (questAction.revokeRoles) {
-			let guildMember = interaction.guild.members.resolve(interaction.user.id);
+		let guildMember = interaction.guild.members.resolve(interaction.user.id);
 
+		if (questAction.revokeRoles) {
 			guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
 		}
 
 		if (questAction.assignRole) {
-			let guildMember = interaction.guild.members.resolve(interaction.user.id);
-
 			guildMember.roles.add(questAction.assignRole);
+		}
+
+		let voiceState = guildMember.voice;
+		if (questAction.setChannel && voiceState.channel) {
+			await StateSetChannel(voiceState, questAction.setChannel);
 		}
 
 		if (questAction.interactionHandler) {

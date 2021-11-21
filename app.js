@@ -181,7 +181,7 @@ client.on('interactionCreate', async interaction => {
 		if (questAction.revokeRoles) {
 			let guildMember = interaction.guild.members.resolve(interaction.user.id);
 
-			guildMember.roles.remove(MainQuest.revokeRoles);
+			guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
 		}
 
 		if (questAction.assignRole) {

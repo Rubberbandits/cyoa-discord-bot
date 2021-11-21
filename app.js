@@ -213,7 +213,7 @@ client.on('interactionCreate', async interaction => {
 		}
 
 		let voiceState = guildMember.voice;
-		if (questAction.setChannel && voiceState.channel) {
+		if (voiceState.channel) {
 			await StateSetChannel(voiceState, questAction.setChannel);
 		}
 

@@ -66,6 +66,10 @@ function ConstructQuestAction(actionID)
 		.setColor('#0099ff')
 		.setDescription(action.message || "No message.");
 
+	if (action.image) {
+		embed.setImage(action.image);
+	}
+
 	let actionComponents = [];
 	if (action.interactionType === BUTTON) {
 		action.choices.forEach(choice => {

@@ -47,10 +47,8 @@ for (var choice in MainQuest.actions) {
 
 async function StateSetChannel(voiceState, channelID)
 {
-	if (!channelID) {
-		await voiceState.setMute(true);
-		await voiceState.setChannel(process.env.VOICE_WAITING_ID);
-	} else {
+	let nextChannel = channelID || process.env.VOICE_WAITING_ID;
+	if (voiceState.channelID != nextChannel) {
 		await voiceState.setMute(true);
 		await voiceState.setChannel(channelID);
 	}

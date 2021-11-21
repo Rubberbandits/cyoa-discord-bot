@@ -178,6 +178,12 @@ client.on('interactionCreate', async interaction => {
 
 		playerObj.addChoice(customID);
 
+		if (questAction.revokeRoles) {
+			let guildMember = interaction.guild.members.resolve(interaction.user.id);
+
+			guildMember.roles.remove(MainQuest.revokeRoles);
+		}
+
 		if (questAction.assignRole) {
 			let guildMember = interaction.guild.members.resolve(interaction.user.id);
 

@@ -6,6 +6,7 @@ const MainQuest = {
 	description: "Quest description",
 	entry_label: "START",
 	entry_style: "DANGER",
+	revokeRoles: [],
 	actions: {
 		entrypoint: {
 			interactionType: BUTTON,

@@ -179,7 +179,9 @@ client.on('interactionCreate', async interaction => {
 		playerObj.addChoice(customID);
 
 		if (questAction.assignRole) {
-			interaction.user.roles.add(questAction.assignRole);
+			let guildMember = interaction.guild.members.resolve(interaction.user.id);
+
+			guildMember.roles.add(questAction.assignRole);
 		}
 
 		if (questAction.interactionHandler) {

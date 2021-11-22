@@ -4,7 +4,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('player_setchoice')
+		.setName('player_choices')
 		.setDescription('View an active player\'s choices up to now.')
 		.addUserOption(option =>
 			option.setName('user')

@@ -19,7 +19,12 @@ async function PlayerMadeChoice(player, customID, guild)
 		let guildMember = guild.members.resolve(player.user.id);
 
 		if (questAction.revokeRoles) {
-			guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
+            let revokeRoles = questAction.revokeRoles
+            if (typeof questAction.revokeRoles !== "object" && typeof questAction.revokeRoles !== "string") {
+                revokeRoles = MainQuest.revokeRoles;
+            }
+            
+			guildMember.roles.remove(revokeRoles);
 		}
 
 		if (questAction.assignRole) {

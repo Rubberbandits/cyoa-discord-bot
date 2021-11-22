@@ -36,6 +36,9 @@ module.exports = {
 		await interaction.reply({ content: 'Player has had their choice set.', ephemeral: true });
 	},
 	async canRun(interaction, players) {
-		return true
+		let guildMember = interaction.guild.members.resolve(interaction.user.id);
+		let roles = guildMember.roles.cache;
+
+		return roles.get("912056682572570704") !== null
 	}
 };

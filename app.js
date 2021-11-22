@@ -4,6 +4,7 @@ require("dotenv").config();
 // Require the necessary discord.js classes
 const { 
 	Client, 
+	Collection, 
 	Intents, 
 	MessageActionRow, 
 	MessageButton, 
@@ -13,6 +14,15 @@ const {
 
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+client.commands = new Collection();
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+	// Set a new item in the Collection
+	// With the key as the command name and the value as the exported module
+	client.commands.set(command.data.name, command);
+}
 
 // Load player object
 const { Player } = require("./player.js");
@@ -181,46 +191,64 @@ client.once('ready', async () => {
 
 // Register interaction event
 client.on('interactionCreate', async interaction => {
-	if (!interaction.isMessageComponent()) return;
+	switch (interaction.type) {
+		case "APPLICATION_COMMAND":
+			const command = client.commands.get(interaction.commandName);
 
-	let customID = interaction.customId;
-	let handler = INTERACTION_HANDLERS[customID];
-	if (handler !== undefined) {
-		await handler(interaction);
+			if (!command) return;
+			if (command.canRun && !await command.canRun(interaction)) {
+				await interaction.reply({ content: 'You don\'t have the required permissions to run this command!', ephemeral: true });
+			}
+		
+			try {
+				await command.execute(interaction);
+			} catch (error) {
+				console.error(error);
+				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			}
+		case "MESSAGE_COMPONENT":
+			let customID = interaction.customId;
+			let handler = INTERACTION_HANDLERS[customID];
+			if (handler !== undefined) {
+				await handler(interaction);
+			}
+		
+			let questAction = MainQuest.actions[customID];
+			if (questAction) {
+				let playerObj = ActivePlayers.get(interaction.user.id);
+		
+				if (!playerObj.canChoose(customID)) {
+					interaction.deferUpdate();
+					return;
+				}
+		
+				playerObj.addChoice(customID);
+		
+				let guildMember = interaction.guild.members.resolve(interaction.user.id);
+		
+				if (questAction.revokeRoles) {
+					guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
+				}
+		
+				if (questAction.assignRole) {
+					guildMember.roles.add(questAction.assignRole);
+				}
+		
+				let voiceState = guildMember.voice;
+				if (voiceState.channel) {
+					await StateSetChannel(voiceState, questAction.setChannel);
+				}
+		
+				if (questAction.interactionHandler) {
+					await questAction.interactionHandler(customID, interaction);
+				} else {
+					await GenericQuestAction(customID, interaction);
+				}
+			}
+		default: 
+			console.log("Unhandled interaction");
 	}
 
-	let questAction = MainQuest.actions[customID];
-	if (questAction) {
-		let playerObj = ActivePlayers.get(interaction.user.id);
-
-		if (!playerObj.canChoose(customID)) {
-			interaction.deferUpdate();
-			return;
-		}
-
-		playerObj.addChoice(customID);
-
-		let guildMember = interaction.guild.members.resolve(interaction.user.id);
-
-		if (questAction.revokeRoles) {
-			guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
-		}
-
-		if (questAction.assignRole) {
-			guildMember.roles.add(questAction.assignRole);
-		}
-
-		let voiceState = guildMember.voice;
-		if (voiceState.channel) {
-			await StateSetChannel(voiceState, questAction.setChannel);
-		}
-
-		if (questAction.interactionHandler) {
-			await questAction.interactionHandler(customID, interaction);
-		} else {
-			await GenericQuestAction(customID, interaction);
-		}
-	}
 });
 
 // Login to Discord with your client's token

@@ -208,6 +208,8 @@ client.on('interactionCreate', async interaction => {
 				console.error(error);
 				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 			}
+
+			break;
 		case "MESSAGE_COMPONENT":
 			let customID = interaction.customId;
 			let handler = INTERACTION_HANDLERS[customID];
@@ -247,6 +249,8 @@ client.on('interactionCreate', async interaction => {
 					await GenericQuestAction(customID, interaction);
 				}
 			}
+
+			break;
 		default: 
 			console.log("Unhandled interaction");
 	}

@@ -54,17 +54,10 @@ for (var choice in MainQuest.actions) {
 }
 
 /*
-	Channel Movement Helper
+	Handlers/Helpers
 */
 
-async function StateSetChannel(voiceState, channelID)
-{
-	let nextChannel = channelID || process.env.VOICE_WAITING_ID;
-	if (voiceState.channelID != nextChannel) {
-		await voiceState.setMute(true);
-		await voiceState.setChannel(nextChannel);
-	}
-}
+const { StateSetChannel, PlayerMadeChoice } = require("./handlers.js");
 
 async function GenericQuestAction(actionID, i)
 {
@@ -196,14 +189,14 @@ client.on('interactionCreate', async interaction => {
 	switch (interaction.type) {
 		case "APPLICATION_COMMAND":
 			const command = client.commands.get(interaction.commandName);
-
 			if (!command) return;
-			if (command.canRun && !await command.canRun(interaction)) {
+
+			if (command.canRun && !await command.canRun(interaction, ActivePlayers)) {
 				await interaction.reply({ content: 'You don\'t have the required permissions to run this command!', ephemeral: true });
 			}
 		
 			try {
-				await command.execute(interaction);
+				await command.execute(interaction, ActivePlayers);
 			} catch (error) {
 				console.error(error);
 				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
@@ -216,33 +209,18 @@ client.on('interactionCreate', async interaction => {
 			if (handler !== undefined) {
 				await handler(interaction);
 			}
-		
+
+			let playerObj = ActivePlayers.get(interaction.user.id);
 			let questAction = MainQuest.actions[customID];
+
 			if (questAction) {
-				let playerObj = ActivePlayers.get(interaction.user.id);
-		
 				if (!playerObj.canChoose(customID)) {
-					interaction.deferUpdate();
+					await interaction.deferReply();
 					return;
 				}
-		
-				playerObj.addChoice(customID);
-		
-				let guildMember = interaction.guild.members.resolve(interaction.user.id);
-		
-				if (questAction.revokeRoles) {
-					guildMember.roles.remove(typeof questAction.revokeRoles === "object" ? questAction.revokeRoles : MainQuest.revokeRoles);
-				}
-		
-				if (questAction.assignRole) {
-					guildMember.roles.add(questAction.assignRole);
-				}
-		
-				let voiceState = guildMember.voice;
-				if (voiceState.channel) {
-					await StateSetChannel(voiceState, questAction.setChannel);
-				}
-		
+
+				await PlayerMadeChoice(playerObj, customID, interaction.guild);
+
 				if (questAction.interactionHandler) {
 					await questAction.interactionHandler(customID, interaction);
 				} else {

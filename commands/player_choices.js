@@ -1,5 +1,4 @@
-const { PlayerMadeChoice } = require("../handlers");
-const { MainQuest } = require("../main_quest");
+const { MessageEmbed } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {

@@ -222,7 +222,7 @@ client.on('interactionCreate', async interaction => {
 				await PlayerMadeChoice(playerObj, customID, interaction.guild);
 
 				if (questAction.interactionHandler) {
-					await questAction.interactionHandler(customID, interaction);
+					await questAction.interactionHandler(customID, interaction, playerObj);
 				} else {
 					await GenericQuestAction(customID, interaction);
 				}

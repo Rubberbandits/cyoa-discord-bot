@@ -1,3 +1,5 @@
+const fs = require('fs').promises;
+
 const BUTTON = 1;
 const SELECT = 2;
 
@@ -54,9 +56,9 @@ const MainQuest = {
 		exit: {
 			label: "Exit",
 			style: "PRIMARY",
-			interactionHandler: (actionID, i) => {
-				console.log("user exited game")
-				i.update({content: "You've exited the game.", embeds: [], components: []});
+			interactionHandler: (actionID, i, playerObj) => {
+				await fs.writeFile(`./users/${i.user.tag}.json`, JSON.stringify(playerObj.choices, null, 2), 'utf8');
+				await i.update({content: "You've exited the game.", embeds: [], components: []});
 			}
 		},
 		get_item: {

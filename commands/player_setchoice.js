@@ -16,8 +16,8 @@ module.exports = {
 				.setRequired(true)),
 					
 	async execute(interaction, players) {
-		let user = interaction.get("user", true);
-		let choice = interaction.get("choice", true);
+		let user = interaction.options.get("user", true);
+		let choice = interaction.options.get("choice", true);
 
 		let playerObj = players.get(user.id);
 		let questAction = MainQuest.actions[choice];

@@ -215,10 +215,10 @@ client.on('interactionCreate', async interaction => {
 
 			if (questAction) {
 				if (!playerObj.canChoose(customID)) {
-					await interaction.deferReply();
-					return;
+					questAction = playerObj.getCurrentChoice();
+					customID = playerObj.getCurrentChoiceID();
 				}
-
+				
 				await PlayerMadeChoice(playerObj, customID, interaction.guild);
 
 				if (questAction.interactionHandler) {

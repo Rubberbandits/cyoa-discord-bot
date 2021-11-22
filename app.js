@@ -12,6 +12,8 @@ const {
 	MessageSelectMenu 
 } = require('discord.js');
 
+const fs = require("fs");
+
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 client.commands = new Collection();

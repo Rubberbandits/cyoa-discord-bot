@@ -56,7 +56,7 @@ const MainQuest = {
 		exit: {
 			label: "Exit",
 			style: "PRIMARY",
-			interactionHandler: (actionID, i, playerObj) => {
+			interactionHandler: async (actionID, i, playerObj) => {
 				await fs.writeFile(`./users/${i.user.tag}.json`, JSON.stringify(playerObj.choices, null, 2), 'utf8');
 				await i.update({content: "You've exited the game.", embeds: [], components: []});
 			}

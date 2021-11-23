@@ -40,7 +40,10 @@ client.once('ready', async () => {
 	const subscription = connection.subscribe(player);
 
 	player.on(AudioPlayerStatus.Idle, () => {
-		player.play(resource);
+        let nextResource = createAudioResource(fs.createReadStream(path.join(__dirname, './track.ogg'), {
+            inputType: StreamType.OggOpus,
+        }));
+        player.play(nextResource);
 	});
 
 	console.log("Bot ready!")

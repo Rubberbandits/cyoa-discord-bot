@@ -2,3 +2,6 @@
 .env
 
 node_modules
+
+audio_bot/package-lock.json
+audio_bot/track.ogg

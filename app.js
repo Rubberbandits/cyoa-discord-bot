@@ -15,7 +15,7 @@ const {
 const fs = require("fs");
 
 // Create a new client instance
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -241,11 +241,15 @@ client.on('interactionCreate', async interaction => {
 
 // Monitor Messages
 client.on("messageCreate", async message => {
-	if (message.channelId == "912057609064951878" && message.content.includes("passphrase")) {
+	if (message.channelId == "912057609064951878") {
 		let playerObj = ActivePlayers.get(message.author.id);
 		if (!playerObj) return;
 
-		await PlayerMadeChoice(playerObj, "choiceID", message.guild);
+		if (message.content.toLowerCase().includes("correct_password")) {
+			await PlayerMadeChoice(playerObj, "joe_audio", message.guild);
+		} else {
+			await PlayerMadeChoice(playerObj, "anything_else", message.guild);
+		}
 	} else if (
 			message.channelId == "912057554123763723" && 
 			message.attachments.first() !== undefined && 
@@ -254,7 +258,7 @@ client.on("messageCreate", async message => {
 		let playerObj = ActivePlayers.get(message.author.id);
 		if (!playerObj) return;
 
-		await PlayerMadeChoice(playerObj, "choiceID", message.guild);
+		await PlayerMadeChoice(playerObj, "sefirot_eight", message.guild);
 	}
 });
 

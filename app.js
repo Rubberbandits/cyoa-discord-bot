@@ -239,5 +239,24 @@ client.on('interactionCreate', async interaction => {
 
 });
 
+// Monitor Messages
+client.on("messageCreate", async message => {
+	if (message.channelId == "912057609064951878" && message.content.includes("passphrase")) {
+		let playerObj = ActivePlayers.get(message.author.id);
+		if (!playerObj) return;
+
+		await PlayerMadeChoice(playerObj, "choiceID", message.guild);
+	} else if (
+			message.channelId == "912057554123763723" && 
+			message.attachments.first() !== undefined && 
+			message.attachments.first().contentType.includes("image/")
+		) {
+		let playerObj = ActivePlayers.get(message.author.id);
+		if (!playerObj) return;
+
+		await PlayerMadeChoice(playerObj, "choiceID", message.guild);
+	}
+});
+
 // Login to Discord with your client's token
 client.login(process.env.DISCORD_TOKEN);

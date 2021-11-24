@@ -72,7 +72,11 @@ async function GenericQuestAction(actionID, i)
 		message.components = [actions];
 	}
 
-	await i.update(message);
+	try {
+		await i.update(message);
+	} catch(err) {
+		console.log(err);
+	}
 }
 
 function ConstructQuestAction(actionID)

@@ -3,7 +3,7 @@ const { MainQuest } = require("./main_quest");
 async function StateSetChannel(voiceState, channelID)
 {
 	let nextChannel = channelID || process.env.VOICE_WAITING_ID;
-	if (voiceState.channelID != nextChannel) {
+	if (voiceState.channelId != nextChannel) {
 		await voiceState.setMute(true);
 		await voiceState.setChannel(nextChannel);
 	}

@@ -245,7 +245,7 @@ client.on("messageCreate", async message => {
 		let playerObj = ActivePlayers.get(message.author.id);
 		if (!playerObj) return;
 
-		if (message.content.toLowerCase().includes("YHWH")) {
+		if (message.content.toLowerCase().includes("yhwh")) {
 			await PlayerMadeChoice(playerObj, "correct_password", message.guild);
 		} else {
 			await PlayerMadeChoice(playerObj, "anything_else", message.guild);

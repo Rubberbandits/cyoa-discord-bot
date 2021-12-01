@@ -250,15 +250,16 @@ client.on("messageCreate", async message => {
 		} else {
 			await PlayerMadeChoice(playerObj, "anything_else", message.guild);
 		}
-	} else if (
-			message.channelId == "912057554123763723" && 
-			message.attachments.first() !== undefined && 
-			message.attachments.first().contentType.includes("image/")
-		) {
+	} else if (message.channelId == "912057554123763723") {
+		if (message.attachments.first() === undefined || !message.attachments.first().contentType.includes("image/")) {
+			message.delete();
+			return;
+		}
+
 		let playerObj = ActivePlayers.get(message.author.id);
 		if (!playerObj) return;
 
-		await PlayerMadeChoice(playerObj, "sefirot_eight", message.guild);
+		await PlayerMadeChoice(playerObj, "r_change", message.guild);
 	}
 });
 

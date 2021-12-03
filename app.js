@@ -128,7 +128,7 @@ const INTERACTION_HANDLERS = {
 			playerObj.addChoice(questAction);
 
 			ActivePlayers.set(client.id, playerObj);
-		} else if (playerObj.getCurrentChoiceID() == "exit") {
+		} else if (playerObj.getCurrentChoiceID() == "sefirot_eight") {
 			return;
 		}
 

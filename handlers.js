@@ -16,6 +16,7 @@ async function PlayerMadeChoice(player, customID, guild)
 		player.addChoice(customID);
 
 		let guildMember = guild.members.resolve(player.user.id);
+		guildMember = await guildMember.fetch(true);
 
 		if (questAction.revokeRoles) {
             let revokeRoles = questAction.revokeRoles
